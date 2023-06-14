@@ -1,0 +1,220 @@
+{% extends 'index.html' %}
+{% load my_filters %}
+
+{% block headline %}{% endblock %}
+{% block header %}
+     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/css/materialize.min.css">
+         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+{% endblock %}
+
+{% block toolbar %}
+    <a href="{% url "owl_real_time_graph" owl.id %}" class="btn">Interactive</a>
+    <a href="{% url "owl_export" owl.id %}" class="btn">Download .json</a>
+    <a href="{% url 'owl_change' owl.id %}" class="btn"><i class="material-icons">edit</i></a>
+    <a href="{% url 'owl_delete' owl.id %}" class="btn red"><i class="material-icons">delete</i></a>
+{% endblock %}
+
+{% block content %}
+    <h1>#{{ owl.id }} - {{ owl.name }}</h1>
+    <h4>
+    Possible Causal Relation
+    </h4>
+    <div class="collection">
+        <ul class="collapsible">
+          {% for data in causal_relation %}
+            <li>
+              <div class="collapsible-header">{{ data.relation }}</div>
+              <div class="collapsible-body">
+                {% for dict in data.grouped_dicts %}
+                    <ul class="collapsible" data-collapsible="accordion">
+                        <li>
+                            <div class="collapsible-header">
+                                <div class="row">
+                                    <div class="col-sm-1">
+                                       <label>
+                                            <input type="checkbox" id="dropdown-toggle-{{ forloop.counter }}" {% if dict|all_causal %}checked{% endif %}>
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <a class="dropdown-trigger" href="#" data-target="dropdown-{{ forloop.counter }}" >
+                                            {{ dict.class }} --> {{ dict.relation }} --> {{ dict.class2 }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="collapsible-body" id="dropdown-{{ forloop.counter }}">
+                                <ul>
+                                    {% for i in dict.instances %}
+                                    <li>
+                                        <a class="collection-item individual {% if i.is_causal %}active{% endif %}" id="{{ i.id }}">
+                                            {{ i.id }}. {{ i.instance }} --> {{ i.relation }} --> {{ i.withInstance }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+
+                {% endfor %}
+
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+
+    </div>
+    <h4>
+    Annotated Causal Relation
+    </h4>
+    <div class="collection">
+        <ul class="collapsible">
+          {% for data in annotated_relation %}
+            <li>
+              <div class="collapsible-header">{{ data.relation }}</div>
+              <div class="collapsible-body">
+                {% for dict in data.grouped_dicts %}
+                    <ul class="collapsible" data-collapsible="accordion">
+                        <li>
+                            <div class="collapsible-header">
+                                <div class="row">
+                                    <div class="col-sm-1">
+                                       <label>
+                                            <input type="checkbox" id="dropdown-toggle-{{ forloop.counter }}" {% if dict|all_causal %}checked{% endif %}>
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <a class="dropdown-trigger" href="#" data-target="dropdown-{{ forloop.counter }}" >
+                                            {{ dict.class }} --> {{ dict.relation }} --> {{ dict.class2 }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="collapsible-body" id="dropdown-{{ forloop.counter }}">
+                                <ul>
+                                    {% for i in dict.instances %}
+                                    <li>
+                                        <a class="collection-item individual {% if i.is_causal %}active{% endif %}" id="{{ i.id }}">
+                                            {{ i.id }}. {{ i.instance }} --> {{ i.relation }} --> {{ i.withInstance }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+
+                {% endfor %}
+
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+
+    </div>
+    <h4>
+    Relation
+    </h4>
+     <div class="collection">
+        <ul class="collapsible">
+          {% for data in uniquekeys %}
+            <li>
+              <div class="collapsible-header">{{ data.relation }}</div>
+              <div class="collapsible-body">
+                {% for dict in data.grouped_dicts %}
+                    <ul class="collapsible" data-collapsible="accordion">
+                        <li>
+                            <div class="collapsible-header">
+                                <div class="row">
+                                    <div class="col-sm-1">
+                                       <label>
+                                            <input type="checkbox" id="dropdown-toggle-{{ forloop.counter }}" {% if dict|all_causal %}checked{% endif %}>
+                                            <span></span>
+                                        </label>
+                                    </div>
+                                    <div class="col-sm-10">
+                                        <a class="dropdown-trigger" href="#" data-target="dropdown-{{ forloop.counter }}" >
+                                            {{ dict.class }} --> {{ dict.relation }} --> {{ dict.class2 }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="collapsible-body" id="dropdown-{{ forloop.counter }}">
+                                <ul>
+                                    {% for i in dict.instances %}
+                                    <li>
+                                        <a class="collection-item individual {% if i.is_causal %}active{% endif %}" id="{{ i.id }}">
+                                            {{ i.id }}. {{ i.instance }} --> {{ i.relation }} --> {{ i.withInstance }}
+                                        </a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+
+                {% endfor %}
+
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+
+    </div>
+<script>
+    var options = {
+        position: 'top',
+      html: true,
+      delay: { show: 500, hide: 200 },
+      transition: 'scale-in',
+      enterDelay: 100,
+      exitDelay: 100
+    };
+    var elems = document.querySelectorAll('.tooltipped');
+    var instances = M.Tooltip.init(elems, options);
+    M.Tabs.init(document.getElementById('tab_overview'), {});
+    M.Collapsible.init(document.querySelectorAll('.collapsible'), {});
+    const checkboxes = document.querySelectorAll('[id^="dropdown-toggle-"]');
+    console.log(checkboxes.entries())
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function () {
+        console.log(checkbox)
+        const collapsibleHeader = this.closest('.collapsible-header');
+        const collapsibleBody = collapsibleHeader.nextElementSibling;
+        const instances = collapsibleBody.querySelectorAll('.individual');
+        console.log(instances);
+        instances.forEach(instance => {
+          instance.classList.toggle('active', this.checked);
+          rel_id=instance.id
+          fetch("/rel/" + rel_id + "/toggle")
+            .then(res => {
+              M.toast({html: 'Saved.', classes: 'rounded'});
+            }).catch(err => {
+              console.log(err);
+            });
+        });
+      });
+    });
+    {#var col_items_ind = document.getElementsByClassName('individual');#}
+    {#for (var i = 0; i < col_items_ind.length; i++) {#}
+    {#    var item = col_items_ind[i];#}
+    {#    item.onclick = function(e) {#}
+    {##}
+    {#        e.srcElement.classList.toggle("active");#}
+    {#        var rel_id = e.srcElement.id;#}
+    {#        fetch("/rel/" + rel_id + "/toggle")#}
+    {#            .then(res => {#}
+    {#                M.toast({html: 'Saved.', classes: 'rounded'});#}
+    {##}
+    {#            }).catch(err => {#}
+    {#                console.log(err);#}
+    {#            });}}#}
+
+
+
+</script>
+{% endblock %}

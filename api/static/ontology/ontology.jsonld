@@ -1,0 +1,73 @@
+{
+  "@context": {
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "ex": "http://example.com/ontology#"
+  },
+  "@graph": [
+    {
+      "@id": "ex:Person",
+      "@type": "owl:Class",
+      "rdfs:label": {
+        "@value": "Person",
+        "@language": "en"
+      },
+      "rdfs:comment": {
+        "@value": "A person is a human being.",
+        "@language": "en"
+      }
+    },
+    {
+      "@id": "ex:Employee",
+      "@type": "owl:Class",
+      "rdfs:label": {
+        "@value": "Employee",
+        "@language": "en"
+      },
+      "rdfs:comment": {
+        "@value": "An employee is a person who works for an organization.",
+        "@language": "en"
+      },
+      "rdfs:subClassOf": {
+        "@id": "ex:Person"
+      }
+    },
+    {
+      "@id": "ex:hasName",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": {
+        "@value": "has name",
+        "@language": "en"
+      },
+      "rdfs:comment": {
+        "@value": "The name of a person.",
+        "@language": "en"
+      },
+      "rdfs:domain": {
+        "@id": "ex:Person"
+      },
+      "rdfs:range": {
+        "@id": "xsd:string"
+      }
+    },
+    {
+      "@id": "ex:hasAge",
+      "@type": "owl:DatatypeProperty",
+      "rdfs:label": {
+        "@value": "has age",
+        "@language": "en"
+      },
+      "rdfs:comment": {
+        "@value": "The age of a person.",
+        "@language": "en"
+      },
+      "rdfs:domain": {
+        "@id": "ex:Person"
+      },
+      "rdfs:range": {
+        "@id": "xsd:integer"
+      }
+    }
+  ]
+}

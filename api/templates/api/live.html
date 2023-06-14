@@ -1,0 +1,833 @@
+{% extends 'index.html' %}
+
+{% block headline %}{% endblock %}
+
+{% block header %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"
+          xmlns="http://www.w3.org/1999/html">
+   <style type="text/css">
+		.node {
+		  stroke: #fff;
+		  fill: #bb8e1d;
+		  stroke-width: 1.5px;
+		}
+
+		.link {
+		  fill: none;
+		  stroke: #2668ba;
+		  stroke-opacity: .6;
+		  stroke-width: 1px;
+		}
+
+		marker {
+			stroke: #bb8e1d;
+			fill:rgba(124,240,10,0);
+		}
+
+		.node-text {
+		  font: 11px sans-serif;
+		  fill:black;
+		}
+
+		.link-text {
+		  font: 9px sans-serif;
+		  fill: #074f69;
+		}
+
+        .tooltip {
+          position: absolute;
+          pointer-events: none;
+          background: #000;
+          color: #fff;
+        }
+            svg{
+			border:1px solid black;
+		}
+	</style>
+    <script>
+
+		function filterNodesById(nodes,id){
+
+			return nodes.filter(function(n) { return n.id === id; });
+		}
+
+		function filterNodesByType(nodes,value){
+			return nodes.filter(function(n) { return n.type === value; });
+		}
+
+		function triplesToGraph(triples){
+
+			svg1.html("");
+            svg2.html("");
+			//Graph
+			var graph={nodes:[], links:[], triples:[]};
+
+			//Initial Graph from triples
+			triples.forEach(function(triple){
+				var subjId = triple.subject;
+				var predId = triple.predicate;
+				var objId = triple.object;
+
+				var subjNode = filterNodesById(graph.nodes, subjId)[0];
+				var objNode  = filterNodesById(graph.nodes, objId)[0];
+
+				if(subjNode==null){
+					subjNode = {id:subjId, label:subjId, weight:1, type:"node"};
+					graph.nodes.push(subjNode);
+				}
+
+				if(objNode==null){
+					objNode = {id:objId, label:objId, weight:1, type:"node"};
+					graph.nodes.push(objNode);
+				}
+
+				var predNode = {id:predId, label:predId, weight:1, type:"pred"} ;
+				graph.nodes.push(predNode);
+
+				var blankLabel = "";
+
+				graph.links.push({source:subjNode, target:predNode, predicate:blankLabel, weight:1});
+				graph.links.push({source:predNode, target:objNode, predicate:blankLabel, weight:1});
+				graph.triples.push({s:subjNode, p:predNode, o:objNode});
+
+			});
+
+			return graph;
+		}
+
+
+
+		function update(){
+			// ==================== Add Marker ====================
+			svg1.append("svg:defs").selectAll("marker")
+			    .data(["end"])
+			  .enter().append("svg:marker")
+			    .attr("id", String)
+			    .attr("viewBox", "0 -5 10 10")
+			    .attr("refX", 17)
+			    .attr("refY", 0)
+			    .attr("markerWidth", 8)
+			    .attr("markerHeight", 8)
+			    .attr("orient", "auto")
+			  .append("svg:polyline")
+			    .attr("points", "0,-5 10,0 0,5")
+			    ;
+			// ==================== Add Links ====================
+			 var links = svg1.selectAll(".link")
+								.data(graph.triples)
+								.enter()
+								.append("path")
+									.attr("marker-end", "url(#end)")
+									.attr("class", "link")
+                                    .style("stroke-width", "2px");
+							;
+
+			// ==================== Add Link Names =====================
+			var linkTexts = svg1.selectAll(".link-text")
+		                .data(graph.triples)
+		                .enter()
+		                .append("text")
+							.attr("class", "link-text")
+							.text( function (d) { return d.p.label; })
+                        .style("font-size", "0.8em")
+						;
+
+				//linkTexts.append("title")
+				//		.text(function(d) { return d.predicate; });
+
+			// ==================== Add Link Names =====================
+			var nodeTexts = svg1.selectAll(".node-text")
+		                .data(filterNodesByType(graph.nodes, "node"))
+		                .enter()
+		                .append("text")
+							.attr("class", "node-text")
+                            .style("fill","seablue")
+							.text( function (d) { return d.label; })
+                        .style("font-size", "1em")
+
+						;
+
+				//nodeTexts.append("title")
+				//		.text(function(d) { return d.label; });
+
+			// ==================== Add Node =====================
+			// ==================== Add Node =====================
+            var nodes = svg1.selectAll(".node")
+                            .data(filterNodesByType(graph.nodes, "node"))
+                            .enter()
+                            .append("g")
+                            .attr("class", "node")
+                            .call(force.drag);
+
+            // Add outer circle to nodes
+            nodes.append("circle")
+                 .attr("r", 15)
+                 .style("fill", "none")
+                 .style("stroke", "#d9b215fa")
+                 .style("stroke-width", "1px");
+
+            // Add inner circle to nodes
+            nodes.append("circle")
+                 .attr("r", 12)
+                 .style("fill", "#c37c0c")
+                 .style("stroke", "#fff")
+                 .style("stroke-width", "2px")
+                 .style("opacity", 1)
+                 //.on("click", clicked)
+                // .on("mouseover", function(d) {
+                  //  tip.style("opacity", 1)
+                 //      .html("Annotation properties")
+                 //      .style("left", (d3.event.pageX-25) + "px")
+                 //      .style("top", (d3.event.pageY-75) + "px");
+                 //})
+                 //.on("mouseout", function(d) {
+                   // tip.style("opacity", 0);
+                 //});
+
+            function clicked(event, d) {
+
+                d3.select(this).transition()
+                    .attr("fill", "black")
+                    .attr("r", 20)
+                  .transition()
+                    .attr("r", 8)
+                    .attr("fill", d3.schemeCategory10[d.index % 10]);
+              }
+            var tip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0)
+
+			// ==================== Force ====================
+
+			force.on("tick", function() {
+
+				nodes
+					.attr("cx", function(d){ return d.x; })
+					.attr("cy", function(d){ return d.y; })
+                    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+					;
+
+				links
+					.attr("d", function(d) {
+						  return "M" 	+ d.s.x + "," + d.s.y
+										+ "S" + d.p.x + "," + d.p.y
+										+ " " + d.o.x + "," + d.o.y;
+						})
+					;
+
+				nodeTexts
+					.attr("x", function(d) { return d.x + 12 ; })
+					.attr("y", function(d) { return d.y + 3; })
+					;
+
+
+				linkTexts
+					.attr("x", function(d) { return 4 + (d.s.x + d.p.x + d.o.x)/3  ; })
+					.attr("y", function(d) { return 4 + (d.s.y + d.p.y + d.o.y)/3 ; })
+					;
+
+
+			});
+
+			// ==================== Run ====================
+			force
+		      .nodes(graph.nodes)
+		      .links(graph.links)
+			  .charge(-800)
+              .friction(0.9)
+			  .linkDistance(100)
+              .start()
+			  ;
+
+
+
+		}
+        function intervened(intervened,outcome){
+			// ==================== Add Marker ====================
+			svg2.append("svg:defs").selectAll("marker")
+			    .data(["end"])
+			  .enter().append("svg:marker")
+			    .attr("id", String)
+			    .attr("viewBox", "0 -5 10 10")
+			    .attr("refX", 17)
+			    .attr("refY", 0)
+			    .attr("markerWidth", 8)
+			    .attr("markerHeight", 8)
+			    .attr("orient", "auto")
+			  .append("svg:polyline")
+			    .attr("points", "0,-5 10,0 0,5")
+			    ;
+
+			// ==================== Add Links ====================
+			 var links = svg2.selectAll(".link")
+								.data(graph.triples)
+								.enter()
+								.append("path")
+									.attr("marker-end", "url(#end)")
+									.attr("class", "link")
+                                    .style("stroke-width", "2px");
+							;
+
+			// ==================== Add Link Names =====================
+			var linkTexts = svg2.selectAll(".link-text")
+		                .data(graph.triples)
+		                .enter()
+		                .append("text")
+							.attr("class", "link-text")
+							.text( function (d) { return d.p.label; })
+                        .style("font-size", "0.8em")
+						;
+
+
+				//linkTexts.append("title")
+				//		.text(function(d) { return d.predicate; });
+
+			// ==================== Add Link Names =====================
+			var nodeTexts = svg2.selectAll(".node-text")
+		                .data(filterNodesByType(graph.nodes, "node"))
+		                .enter()
+		                .append("text")
+							.attr("class", "node-text")
+							.text( function (d) { return d.label; })
+						;
+
+				//nodeTexts.append("title")
+				//		.text(function(d) { return d.label; });
+
+			// ==================== Add Node =====================
+			 var nodes = svg2.selectAll(".node")
+                            .data(filterNodesByType(graph.nodes, "node"))
+                            .enter()
+                            .append("g")
+                            .attr("class", "node")
+                            .call(forceI.drag);
+
+            // Add outer circle to nodes
+            nodes.append("circle")
+                 .attr("r", 15)
+                 .style("fill", "none")
+                 .style("stroke", "#d9b215fa")
+                 .style("stroke-width", "1px");
+
+            // Add inner circle to nodes
+            nodes.append("circle")
+                 .attr("r", 12)
+                 .style("fill", "#c37c0c")
+                 .style("stroke", "#fff")
+                 .style("stroke-width", "2px")
+                 .style("opacity", 1)
+                 .style("fill", function(d) {
+                     if (d.id === intervened) {
+                        return "#4DB6AC";
+                      } else if (d.id === outcome) {
+                        return "steelblue";
+                      } else {
+                        return "dimgrey ";
+                      }
+                 })
+                 //.on("click", clicked)
+                // .on("mouseover", function(d) {
+                  //  tip.style("opacity", 1)
+                 //      .html("Annotation properties")
+                 //      .style("left", (d3.event.pageX-25) + "px")
+                 //      .style("top", (d3.event.pageY-75) + "px");
+                 //})
+                 //.on("mouseout", function(d) {
+                   // tip.style("opacity", 0);
+                 //});
+
+            function clicked(event, d) {
+
+                d3.select(this).transition()
+                    .attr("fill", "black")
+                    .attr("r", 20)
+                  .transition()
+                    .attr("r", 8)
+                    .attr("fill", d3.schemeCategory10[d.index % 10]);
+              }
+            var tip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0)
+
+            // removing incoming link
+            var objectId =intervened;
+            var subjectId= outcome;
+            graph.triples = graph.triples.filter(function(d) {
+                  return d.o.id != objectId ;
+                });
+
+                svg2.selectAll(".link")
+                  .filter(function(d) {
+
+                    return d.o.id == objectId && d.s.id != subjectId;
+                  })
+                  .remove();
+
+
+                svg2.selectAll(".link-text")
+                  .filter(function(d) {
+                    return d.o.id == objectId && d.s.id != subjectId;;
+                  })
+                  .remove();
+
+			// ==================== Force ====================
+
+			forceI.on("tick", function() {
+
+				nodes
+					.attr("cx", function(d){ return d.x; })
+					.attr("cy", function(d){ return d.y; })
+                    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+					;
+
+				links
+					.attr("d", function(d) {
+						  return "M" 	+ d.s.x + "," + d.s.y
+										+ "S" + d.p.x + "," + d.p.y
+										+ " " + d.o.x + "," + d.o.y;
+						})
+					;
+
+				nodeTexts
+					.attr("x", function(d) { return d.x + 12 ; })
+					.attr("y", function(d) { return d.y + 3; })
+					;
+
+
+				linkTexts
+					.attr("x", function(d) { return 4 + (d.s.x + d.p.x + d.o.x)/3  ; })
+					.attr("y", function(d) { return 4 + (d.s.y + d.p.y + d.o.y)/3 ; })
+					;
+
+
+			});
+
+			// ==================== Run ====================
+			forceI
+		      .nodes(graph.nodes)
+		      .links(graph.links)
+			  .charge(-800)
+              .friction(0.9)
+			  .linkDistance(100)
+              .start()
+			  ;
+
+
+
+		}
+
+	</script>
+
+
+{% endblock %}
+
+{% block toolbar %}
+    <a class="btn" href="{% url 'owl_detail' owl.id %}"><-</a>
+{% endblock %}
+{% block content %}
+     <div class="row ">
+        <div class="col m5">
+            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="collapse" data-bs-target="#myCollapse" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Intervention</button>
+            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="collapse" data-bs-target="#myCollapse1" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Counterfactual</button>
+            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="collapse" data-bs-target="#myCollapse3" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Merge Nodes</button>
+              <div class="collapse" id="myCollapse3">
+                <div class="card card-body">
+                    <p style="text-align: center">Merge</p>
+                    <form action="{% url 'merge' owl.id %}" method="post">
+                    {% csrf_token %}
+                      <label for="merge">
+                      </label>
+                          <select class="form-control" id="onN1" name="onN1" ></select>
+                        <select class="form-control" id="onN2" name="onN2" ></select>
+                         <input type="hidden" name="dot_graphN" id="dot_graphN" >
+                        <br>
+                         <button type="submit" class="btn btn-primary"  id="sparqlButton" >Submit</button>
+                    </form>
+                </div>
+            </div>
+            <div class="collapse" id="myCollapse2">
+                <div class="card card-body">
+                    <p style="text-align: center">SPARQL</p>
+                    <form action="{% url 'sparql' owl.id %}" method="post">
+                    {% csrf_token %}
+                        <textarea class="form-control" id="sparqlQuery" name="sparqlQuery" rows="5"></textarea>
+                         <button type="submit" class="btn btn-primary"  id="sparqlButton" >Submit</button>
+                    </form>
+                </div>
+            </div>
+        <!-- Collapsible Element HTML -->
+            <div class="collapse " id="myCollapse">
+                <div class="card card-body">
+                    <p style="text-align: center">Intervention</p>
+                        <form action="{% url 'intervention' owl.id %}" method="post">
+              {% csrf_token %}
+                  <div class="form-group">
+                      <table>
+                          <tr>
+                              <td>
+                                   <label for="doing">Treatment</label>
+                              </td>
+                               <td>
+                                   <select class="form-control" id="onT" name="onT" ></select>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>
+                                   <label for="values">Intervening value</label>
+                              </td>
+                               <td>
+                                     <input type="text" class="radiovalue" id="" name="radiovalue">
+                              </td>
+                          </tr>
+                           <tr>
+                              <td>
+                                   <label for="on">Outcome</label>
+                              </td>
+                               <td>
+                                    <select class="form-control" id="on" name="OnI" ></select>
+                              </td>
+                          </tr>
+                      </table>
+                     <input type="hidden" name="dot_graphI" id="dot_graphI" >
+                      <input type="hidden" name="dataI" id="dataI" >
+                      <input type="hidden" name="profilesI" id="profilesI" >
+                  </div>
+
+                  <div class="row check">
+
+                  </div>
+
+                 <button type="submit" class="btn btn-primary"  id="show-intervened-button" >Submit</button>
+            </form>
+
+                </div>
+            </div>
+            <div class="collapse " id="myCollapse1">
+                <div class="card card-body">
+                    <p style="text-align: center">Counterfactual</p>
+                       <form action="{% url 'calculate_counterfactual' owl.id %}" method="post">
+              {% csrf_token %}
+                  <div class="form-group counterfactaul">
+                      <table>
+                          <tr>
+                              <td><label for="profile">Select a profile : </label></td>
+                              <td> <select class="form-control" id="profile" name="profile" ></select></td>
+                          </tr>
+                          <tr>
+                              <td>
+                                  <label for="intervene">Intervene On : </label>
+                              </td>
+                              <td>
+                                  <select class="form-control" id="onC" name="onC" ></select>
+                              </td>
+                          </tr>
+                          <tr>
+                              <td>
+                                  <label for="values">Value</label>
+                              </td>
+                              <td>
+                                  <input type="text" class="radiovalueC" id="" name="radiovalueC">
+                              </td>
+                          </tr>
+                      </table>
+                    <input type="hidden" name="dot_graphC" id="dot_graphC" >
+                      <input type="hidden" name="dataC" id="dataC" >
+                      <input type="hidden" name="profilesC" id="profilesC" >
+                  </div>
+                  <div class="row checkC">
+
+                  </div>
+
+                 <button type="submit" class="btn btn-primary"  id="show-counterfactual-button" >Submit</button>
+            </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+         <div class="col m12" >
+             <div id="sparqlDiv" style="display: none">
+                 <p>
+                 SPARQL Query result
+             </p>
+             {{ value }}
+             </div>
+
+         </div>
+    </div>
+    <div class="row" >
+        <div class="col m12" >
+            <div id="causalGraph" style="text-align: center">Causal Graph</div>
+            <div id="intervenedGraph" style="text-align: center;display: none">Intervened Causal Graph</div>
+        </div>
+    </div>
+
+    <div class="row" >
+         <div class="col m12">
+             <div id="svg-body">
+             </div>
+             <div id="svg-intervened" style="display: none"></div>
+        </div>
+    </div>
+
+    {% if intervention == 1 %}
+        <div class="row result" >
+             <div class="card blue-grey darken-1" style="width: -webkit-fill-available">
+                <div class="card-content white-text">
+                        <p>When intervening on {{ treatment }} and setting it to {{ value }}, following probability is seen on {{ outcome }}</p>
+                </div>
+            </div>
+            {{ estimate| safe }}
+        </div>
+    {% elif intervention == 0 %}
+        <div class="row result" >
+         <div class="card blue-grey darken-1" style="width: -webkit-fill-available">
+            <div class="card-content white-text">
+                <p> For profile {{ profile }}, if we set {{ treatment }} as {{ value }}, following outcome is observed</p>
+
+            </div>
+        </div>
+        {{ estimate| safe }}
+    </div>
+
+    {% endif %}
+
+
+<script>
+var currentPath = window.location.pathname;
+// Check if "merge" is present in the URL
+var trip = {{ owl.triple|safe }};
+{% if triples %}
+    var trip={{ triples|safe }}
+{% endif %}
+
+
+var test =[]
+var node=""
+var div1 = d3.select("#svg-body");
+var div2 = d3.select("#svg-intervened");
+
+const svg1 = div1.append("svg")
+            .attr("width", div1.style("width"))
+            .attr("height", "600px");
+
+const svg2 = div2.append("svg")
+            .attr("width", div2.style("width"))
+            .attr("height", "600px");
+var graph = triplesToGraph(trip);
+
+var force = d3.layout.force().size([500,500]);
+var forceI = d3.layout.force().size([500,500]);
+update();
+intervened("{{ treatment }}","{{ outcome }}");
+
+var dotFormat = '';
+        trip.forEach(function(link)
+        {
+            dotFormat +=  link.subject + " -> " + link.object + ";";
+        });
+
+        dotFormat += "";
+
+{% if dataProf %}
+    profiles={{ dataProf|safe }}
+{% endif %}
+{% if df %}
+    df={{ df|safe }};
+{% endif %}
+
+
+
+document.getElementById("dot_graphI").value = dotFormat.toString();
+document.getElementById("dot_graphC").value = dotFormat.toString();
+console.log(trip)
+document.getElementById("dot_graphN").value = JSON.stringify(trip);
+if (typeof profiles !== 'undefined') {
+    document.getElementById("profilesI").value = profiles;
+    document.getElementById("profilesC").value = profiles
+}
+if (typeof df !== 'undefined') {
+    document.getElementById("dataI").value = JSON.stringify(df)
+    document.getElementById("dataC").value = JSON.stringify(df)
+}
+
+
+var classes=[];
+var onDrop = document.getElementById("on");
+trip.forEach(function(triple){
+    var subjId = triple.subject;
+    var predId = triple.predicate;
+    var objId = triple.object;
+    if (!classes.includes(subjId))
+    {
+        classes.push(subjId)
+    }
+    if (!classes.includes(objId))
+    {
+        classes.push(objId)
+    }
+})
+ classes.forEach(function(classs){
+        var option = document.createElement("option");
+        option.value=classs;
+        option.text=classs;
+        option.id="on"+classs.replace(/\s+/g, '');
+        onDrop.add(option);
+ })
+var onDropT = document.getElementById("onT");
+classes.forEach(function(classs){
+        var option = document.createElement("option");
+        option.value=classs;
+        option.text=classs;
+        option.id="on"+classs.replace(/\s+/g, '');
+        onDropT.add(option);
+ })
+var onDropC = document.getElementById("onC");
+classes.forEach(function(classs){
+        var option = document.createElement("option");
+        option.value=classs;
+        option.text=classs;
+        option.id="on"+classs.replace(/\s+/g, '');
+        onDropC.add(option);
+ })
+var label = document.querySelector('label[for="doing"]');
+{#classes.forEach(function (classs)#}
+{#{#}
+{#    var className = "form-check form-check-inline";#}
+{#    var inputType = "radio";#}
+{#    var inputId = classs;#}
+{#    var inputValue = classs;#}
+{#    var inputName = "doing";#}
+{#    var inputStyle = "opacity: 1 ;pointer-events: all";#}
+{#    var labelFor = "education";#}
+{#    var labelText = classs;#}
+{##}
+{#    // Create a string of HTML markup for the div element with the dynamic values#}
+{#    var html = `<div class="${className}">` +#}
+{#                  `<input class="form-check-input" type="${inputType}" id="${inputId}" value="${inputValue}" name="${inputName}" style="${inputStyle}">` +#}
+{#                  `<label class="form-check-label" for="${labelFor}">${labelText}</label>` +#}
+{#                `</div>`;#}
+{##}
+{#    // Insert the div element as HTML markup after the label element#}
+{#   // label.insertAdjacentHTML("afterend", html);#}
+{#)#}
+
+// Get a reference to the input box
+var inputBox = document.getElementsByClassName("radiovalue");
+
+var radioInputs = document.querySelectorAll('input[name="doing"]');
+radioInputs.forEach(function (radioInput) {
+  radioInput.addEventListener("click", function () {
+    var radioValue = radioInput.value;
+    document.querySelector('.radiovalue').id = radioValue;
+  });
+});
+
+const svgBody = document.getElementById("svg-body");
+const svgIntervened = document.getElementById("svg-intervened");
+const causalgraph=document.getElementById("causalGraph");
+const intervenedGraph=document.getElementById("intervenedGraph");
+const sparqlDiv = document.getElementById("sparqlDiv")
+// Get reference to the button that should trigger the display change
+
+  // Check if the path contains "intervention"
+  if (currentPath.includes("intervention")) {
+      svgIntervened.style.display = "block";
+      svgIntervened.style.width="50%"
+      svgIntervened.style.float="right"
+      intervenedGraph.style.display = "block";
+      intervenedGraph.style.width="50%"
+      intervenedGraph.style.float="right"
+
+  // Change the width and float style of the svg-body div
+      svgBody.style.width = "50%";
+      svgBody.style.float = "left";
+      causalgraph.style.width = "50%";
+      causalgraph.style.float = "left";
+  }else if (currentPath.includes("counterfactual")) {
+      svgIntervened.style.display = "block";
+      svgIntervened.style.width="50%"
+      svgIntervened.style.float="right"
+      intervenedGraph.style.display = "block";
+      intervenedGraph.style.width="50%"
+      intervenedGraph.style.float="right"
+
+  // Change the width and float style of the svg-body div
+      svgBody.style.width = "50%";
+      svgBody.style.float = "left";
+      causalgraph.style.width = "50%";
+      causalgraph.style.float = "left";
+  }else if (currentPath.includes("sparql"))
+  {
+      sparqlDiv.style.display="block";
+  }
+
+
+var onDropN1 = document.getElementById("onN1");
+classes.forEach(function(classs){
+        var option = document.createElement("option");
+        option.value=classs;
+        option.text=classs;
+        option.id="on"+classs.replace(/\s+/g, '');
+        onDropN1.add(option);
+ })
+
+var onDropN2 = document.getElementById("onN2");
+classes.forEach(function(classs){
+        var option = document.createElement("option");
+        option.value=classs;
+        option.text=classs;
+        option.id="on"+classs.replace(/\s+/g, '');
+        onDropN2.add(option);
+ })
+
+var onDropC = document.getElementById("profile");
+
+profiles.forEach(function(prof){
+            var option = document.createElement("option");
+            option.value=prof;
+            option.text=prof;
+            option.id="on"+prof.replace(/\s+/g, '');
+            onDropC.add(option);
+})
+
+var label = document.querySelector('label[for="merge"]');
+classes.forEach(function (classs) {
+        var className = "form-check form-check-inline";
+        var inputType = "checkbox";
+        var inputId = classs;
+        var inputValue = classs;
+        var inputName = "intervene";
+        var inputStyle = "opacity: 1 ;pointer-events: all";
+        var labelFor = "education";
+        var labelText = classs;
+
+        // Create a string of HTML markup for the div element with the dynamic values
+        var html = `<div class="${className}">` +
+            `<input class="form-check-input" type="${inputType}" id="${inputId}" value="${inputValue}" name="${inputName}" style="${inputStyle}">` +
+            `<label class="form-check-label" for="${labelFor}">${labelText}</label>` +
+            `</div>`;
+
+        // Insert the div element as HTML markup after the label element
+        label.insertAdjacentHTML("afterend", html);
+    }
+)
+
+var inputBoxC = document.getElementsByClassName("radiovalueC");
+
+var radioInputs= document.querySelectorAll('input[name="intervene"]');
+radioInputs.forEach(function (radioInput) {
+
+  radioInput.addEventListener("click", function () {
+    var radioValue = radioInput.value;
+    document.querySelector('.radiovalueC').id = radioValue;
+  });
+});
+
+
+</script>
+
+{% endblock %}

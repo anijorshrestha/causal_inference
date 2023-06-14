@@ -1,0 +1,37 @@
+{
+  "header": {
+    "title": "Example Ontology",
+    "iri": "http://example.com/ontology",
+    "authors": ["John Doe"],
+    "description": "This is an example ontology."
+  },
+  "class": [
+    {
+      "id": "Person",
+      "label": "Person",
+      "comment": "A person is a human being."
+    },
+    {
+      "id": "Employee",
+      "label": "Employee",
+      "comment": "An employee is a person who works for an organization.",
+      "subClassOf": ["Person"]
+    }
+  ],
+  "property": [
+    {
+      "id": "hasName",
+      "label": "has name",
+      "comment": "A person has a name.",
+      "domain": ["Person"],
+      "range": ["string"]
+    },
+    {
+      "id": "worksFor",
+      "label": "works for",
+      "comment": "An employee works for an organization.",
+      "domain": ["Employee"],
+      "range": ["Organization"]
+    }
+  ]
+}

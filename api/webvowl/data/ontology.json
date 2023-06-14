@@ -1,0 +1,242 @@
+{
+  "_comment" : "Created with OWL2VOWL (version 0.3.5), http://vowl.visualdataweb.org",
+  "header" : {
+    "languages" : [ "en", "undefined" ],
+    "baseIris" : [ "http://www.w3.org/1999/02/22-rdf-syntax-ns", "http://www.w3.org/2000/01/rdf-schema", "http://www.w3.org/2001/XMLSchema", "https://w3id.org/example" ],
+    "title" : {
+      "en" : "The example ontology"
+    },
+    "iri" : "https://w3id.org/example",
+    "version" : "1.0.1",
+    "author" : [ "Daniel Garijo", "Maria Poveda-Villalon" ],
+    "description" : {
+      "en" : "This is an example ontology to illustrate some of the annotations that should be included"
+    },
+    "comments" : {
+      "en" : "An example vocabulary designed to illustrate how to publish vocabularies on the Web following the FAIR principles. This vocabulary describes three simple classes with 3 properties and a data property."
+    },
+    "other" : {
+      "license" : [ {
+        "identifier" : "license",
+        "language" : "undefined",
+        "value" : "http://creativecommons.org/licenses/by/2.0/",
+        "type" : "iri"
+      } ],
+      "priorVersion" : [ {
+        "identifier" : "priorVersion",
+        "language" : "undefined",
+        "value" : "https://w3id.org/example/1.0.0",
+        "type" : "iri"
+      } ],
+      "creator" : [ {
+        "identifier" : "creator",
+        "language" : "en",
+        "value" : "Daniel Garijo",
+        "type" : "label"
+      }, {
+        "identifier" : "creator",
+        "language" : "en",
+        "value" : "Maria Poveda-Villalon",
+        "type" : "label"
+      } ],
+      "citation" : [ {
+        "identifier" : "citation",
+        "language" : "en",
+        "value" : "Cite this vocabulary as: Garijo, D. and Poveda-Villalon, M. The example ontology 1.0.1.",
+        "type" : "label"
+      } ],
+      "created" : [ {
+        "identifier" : "created",
+        "language" : "en",
+        "value" : "February 5th, 2020",
+        "type" : "label"
+      } ],
+      "preferredNamespacePrefix" : [ {
+        "identifier" : "preferredNamespacePrefix",
+        "language" : "en",
+        "value" : "exo",
+        "type" : "label"
+      } ],
+      "versionInfo" : [ {
+        "identifier" : "versionInfo",
+        "language" : "en",
+        "value" : "1.0.1",
+        "type" : "label"
+      } ],
+      "abstract" : [ {
+        "identifier" : "abstract",
+        "language" : "en",
+        "value" : "An example vocabulary designed to illustrate how to publish vocabularies on the Web following the FAIR principles",
+        "type" : "label"
+      } ],
+      "preferredNamespaceUri" : [ {
+        "identifier" : "preferredNamespaceUri",
+        "language" : "undefined",
+        "value" : "https://w3id.org/example",
+        "type" : "label"
+      } ],
+      "title" : [ {
+        "identifier" : "title",
+        "language" : "en",
+        "value" : "The example ontology",
+        "type" : "label"
+      } ],
+      "backwardCompatibleWith" : [ {
+        "identifier" : "backwardCompatibleWith",
+        "language" : "undefined",
+        "value" : "https://w3id.org/example/1.0.0",
+        "type" : "iri"
+      } ]
+    }
+  },
+  "namespace" : [ ],
+  "class" : [ {
+    "id" : "1",
+    "type" : "owl:Class"
+  }, {
+    "id" : "5",
+    "type" : "owl:Class"
+  }, {
+    "id" : "2",
+    "type" : "rdfs:Datatype"
+  }, {
+    "id" : "4",
+    "type" : "owl:Class"
+  } ],
+  "classAttribute" : [ {
+    "iri" : "https://w3id.org/example#Organization",
+    "baseIri" : "https://w3id.org/example",
+    "instances" : 0,
+    "annotations" : {
+      "example" : [ {
+        "identifier" : "example",
+        "language" : "en",
+        "value" : "University of Southern California",
+        "type" : "label"
+      } ]
+    },
+    "label" : {
+      "IRI-based" : "Organization",
+      "en" : "Organization"
+    },
+    "comment" : {
+      "en" : "An organized body of people with a particular purpose, especially a business, society, association, etc."
+    },
+    "id" : "1"
+  }, {
+    "iri" : "https://w3id.org/example#Student",
+    "baseIri" : "https://w3id.org/example",
+    "instances" : 0,
+    "label" : {
+      "IRI-based" : "Student",
+      "en" : "Student"
+    },
+    "comment" : {
+      "en" : "Student is a class introduced in the version 1.0.1 of the ontology. "
+    },
+    "id" : "5"
+  }, {
+    "iri" : "http://www.w3.org/2001/XMLSchema#date",
+    "baseIri" : "http://www.w3.org/2001/XMLSchema",
+    "id" : "2",
+    "label" : {
+      "IRI-based" : "date"
+    }
+  }, {
+    "iri" : "https://w3id.org/example#Researcher",
+    "baseIri" : "https://w3id.org/example",
+    "instances" : 0,
+    "annotations" : {
+      "rationale" : [ {
+        "identifier" : "rationale",
+        "language" : "en",
+        "value" : "The reason why this concept was added to the ontology. This could reflect some agreement or use cases that may need to be reflected here. For example: The concept Researcher was added to the ontology to represent those authors of scientific publications that belong to a public institution.",
+        "type" : "label"
+      } ],
+      "example" : [ {
+        "identifier" : "example",
+        "language" : "en",
+        "value" : "An example using the Researcher class, e.g., Bob is a professor at the University of Southern California.",
+        "type" : "label"
+      } ]
+    },
+    "label" : {
+      "IRI-based" : "Researcher",
+      "en" : "Researcher"
+    },
+    "comment" : {
+      "en" : "A definition of your class. For example, A researcher is a person who publishes scientific papers, writes research proposals and mentors students"
+    },
+    "id" : "4"
+  } ],
+  "property" : [ {
+    "id" : "0",
+    "type" : "owl:datatypeProperty"
+  }, {
+    "id" : "3",
+    "type" : "owl:objectProperty"
+  }, {
+    "id" : "6",
+    "type" : "owl:objectProperty"
+  }, {
+    "id" : "7",
+    "type" : "owl:objectProperty"
+  } ],
+  "propertyAttribute" : [ {
+    "iri" : "https://w3id.org/example#foundedIn",
+    "baseIri" : "https://w3id.org/example",
+    "range" : "2",
+    "label" : {
+      "IRI-based" : "foundedIn",
+      "en" : "founded in"
+    },
+    "domain" : "1",
+    "comment" : {
+      "en" : "Date when an organization was founded"
+    },
+    "attributes" : [ "datatype" ],
+    "id" : "0"
+  }, {
+    "iri" : "https://w3id.org/example#partOf",
+    "baseIri" : "https://w3id.org/example",
+    "range" : "1",
+    "label" : {
+      "IRI-based" : "partOf",
+      "en" : "part of"
+    },
+    "domain" : "4",
+    "comment" : {
+      "en" : "This property links instances from Researcher to Organization"
+    },
+    "attributes" : [ "object" ],
+    "id" : "3"
+  }, {
+    "iri" : "https://w3id.org/example#hasMentor",
+    "baseIri" : "https://w3id.org/example",
+    "range" : "4",
+    "label" : {
+      "IRI-based" : "hasMentor",
+      "en" : "has mentor"
+    },
+    "domain" : "5",
+    "comment" : {
+      "en" : "This property links the students to the researcher who mentored them"
+    },
+    "attributes" : [ "object" ],
+    "id" : "6"
+  }, {
+    "iri" : "https://w3id.org/example#hasMember",
+    "baseIri" : "https://w3id.org/example",
+    "range" : "4",
+    "label" : {
+      "IRI-based" : "hasMember",
+      "en" : "has member"
+    },
+    "domain" : "1",
+    "comment" : {
+      "en" : "This example property indicates that an Organization has a Researcher as member"
+    },
+    "attributes" : [ "object" ],
+    "id" : "7"
+  } ]
+}

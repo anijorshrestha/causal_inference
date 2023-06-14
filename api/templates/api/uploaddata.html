@@ -1,0 +1,12 @@
+{% extends 'index.html' %}
+
+{% block headline %}{% if owl %}Ontology #{{ owl.id }}{% else %}Import Data{% endif %}{% endblock%}
+
+{% block content %}
+<form  role="from" id="owl_change_form" enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+    <input type="file" name="document">
+
+    <button class="btn pulse">Submit</button>
+</form>
+{% endblock %}

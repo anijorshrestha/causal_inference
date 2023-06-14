@@ -1,0 +1,42 @@
+{% extends 'index.html' %}
+
+{% block headline %}Ontologies{% endblock %}
+
+{% block toolbar %}
+  <a class="btn waves-effect waves-light" href="{% url 'owl_upload' %}"><i class="material-icons">add</i></a>
+{% endblock %}
+
+{% block content %}
+<table class="responsive-table">
+  <thead>
+    <th>Name</th>
+    <th>Classes</th>
+    <th>Instances</th>
+    <th>Relationships</th>
+    <th>Options</th>
+  </thead>
+  <tbody>
+    {% for owl in owls %}
+        <tr>
+        <td>
+            <a href="{% url 'owl_detail' owl.id %}">{% if owl.name %}{{ owl.name }}{% endif %} ({{ owl.id }})</a>
+        </td>
+        <td>{{ owl.total_class_count }}</td>
+        <td>{{ owl.total_instance_count }}</td>
+        <td>{{ owl.total_relation_count }}</td>
+        <td>
+            <a href="{% url "owl_real_time_graph" owl.id %}">Interactive</a> |
+            <a href="{% url "owl_visualize" owl.id %}">Visualize</a> |
+            <a href="{% url "owl_export" owl.id %}">Download .json</a> |
+            <a href="{% url 'owl_change' owl.id %}">Edit</a> |
+            <a href="{% url 'data_import' owl.id %}">Import Data</a> |
+            <a href="{% url 'data_detail' owl.id %}">View Data</a> |
+            <a href="{% url 'owl_delete' owl.id %}" style="color: red">Delete</a>
+        </td>
+        </tr>
+    {% empty %}
+        No Ontologies uploaded.
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
