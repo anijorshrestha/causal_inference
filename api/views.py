@@ -183,8 +183,91 @@ def merge(request,owl_id):
         predicate = triple['predicate']
         obj = new_node if triple['object'] == main_node else triple['object']
         updated_triples.append({'subject': subject, 'predicate': predicate, 'object': obj})
-
     return render(request, 'api/live.html', {'owl': get_object_or_404(OWLFile, id=owl_id),'triples':updated_triples})
+
+@ensure_csrf_cookie
+def newMerge(request,owl_id):
+    mergeTriples = json.loads(request.POST.get('selectedValue'))
+    json_output = json.dumps([json.loads(item) for item in mergeTriples])
+    output = json.loads(json_output)
+    triples=json.loads(request.POST.get('tripless'))
+    for triple in output:
+        main_node=triple['subject']
+        branch_node=triple['object']
+        new_node = main_node + branch_node
+        for item in triples:
+            if item['subject'] != main_node or item['object'] != branch_node:
+                if item['subject'] == main_node:
+                    new_dict = {'predicate': item['predicate'], 'subject': new_node, 'object': item['object']}
+                    triples.append(new_dict)
+                if item['object'] == main_node:
+                    new_dict = {'predicate': item['predicate'], 'subject': item['subject'], 'object': new_node}
+                    triples.append(new_dict)
+    return render(request, 'api/causalGraph.html', {'owl': get_object_or_404(OWLFile, id=owl_id),'mergedTriples':triples})
+
+@ensure_csrf_cookie
+def chain(request,owl_id):
+    trip1 = json.loads(request.POST.get('chain'))
+    trip2 =json.loads(request.POST.get('chain1'))
+    triples = json.loads(request.POST.get('triplesChain'))
+    start_node = trip1['subject']
+    end_node = trip2['object']
+    chain = find_chain(triples, start_node, end_node)
+    print(chain)
+    if chain:
+        # Create a new triple by removing the mediator
+        new_triple = {'subject':start_node, 'predicate':chain['predicate'][1], 'object':end_node}
+        print("New triple:", new_triple)
+    else:
+        print("No chain found from", start_node, "to", end_node)
+
+    triples.append(new_triple)
+    print("new triple")
+    print(triples)
+    return render(request, 'api/causalGraph.html', {'owl': get_object_or_404(OWLFile, id=owl_id),'mergedTriples':triples})
+
+def find_chain(triples, start_node, end_node):
+    stack = [(start_node, [])]
+    while stack:
+        node, path = stack.pop()
+        if node == end_node:
+            chain_dict = {'subject': start_node, 'object': end_node, 'predicate': path}
+            return chain_dict
+
+        for triple in triples:
+            if triple['subject'] == node and triple['object'] not in path:
+                stack.append((triple['object'], path + [triple['predicate']]))
+
+    return None
+
+def causalRel(request,owl_id):
+    mergeTriples = json.loads(request.POST.get('selectedValueF'))
+    json_output = json.dumps([json.loads(item) for item in mergeTriples])
+    triples = json.loads(json_output)
+    return render(request, 'api/causalGraph.html',
+                  {'owl': get_object_or_404(OWLFile, id=owl_id), 'mergedTriples': triples})
+
+
+def causalGraph(request,owl_id):
+    obj = get_object_or_404(OWLFile, id=owl_id)
+    # triple = obj.triple()
+    triple=[{'subject': 'umgebungsluft', 'predicate': 'has_quality', 'object': 'temperatur'},
+     {'subject': 'umgebungsluft', 'predicate': 'participates_in', 'object': 'process'},
+     {'subject': 'process', 'predicate': 'has_characteristics', 'object': 'parameter'},
+     {'subject': 'process', 'predicate': 'has_output', 'object': 'product'},
+     {'subject': 'product', 'predicate': 'has_quality', 'object': 'qualitateswerk'}]
+
+    # triple = [{'subject': 'position', 'predicate': 'environs', 'object': 'fehlerevent'},
+    #           {'subject': 'fehlerevent', 'predicate': 'prescribedBy', 'object': 'fehlermeldung Info'},
+    #           {'subject': 'position', 'predicate': 'continuantPartOfAllTimes', 'object': 'Materielles Artefakt'},
+    #           {'subject': 'Materielles Artefakt', 'predicate': 'componentPartOfAllTimes', 'object': 'Technishce System'},
+    #           {'subject': 'Materielles Artefakt', 'predicate': 'participatesInAllTime', 'object': 'Zustand'},
+    #           {'subject': 'Zustand', 'predicate': 'isStateOf', 'object': 'Process'},
+    #           {'subject': 'Process', 'predicate': 'hasProcessCharacteristics', 'object': 'Process Parameter'},
+    #           {'subject': 'Process', 'predicate': 'hasOccurent', 'object': 'fehlerevent'}]
+
+    return render(request, 'api/causalGraph.html', {'owl': get_object_or_404(OWLFile, id=owl_id),'mergedTriples':triple})
+
 
 
 def sparql(request,owl_id):

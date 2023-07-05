@@ -427,146 +427,58 @@
     <a class="btn" href="{% url 'owl_detail' owl.id %}"><-</a>
 {% endblock %}
 {% block content %}
-     <div class="row ">
+     <div class="row">
         <div class="col m5">
-            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="collapse" data-bs-target="#myCollapse" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Intervention</button>
-            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="collapse" data-bs-target="#myCollapse1" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Counterfactual</button>
             <button type="button" class="btn btn-primary ms-3" data-bs-toggle="collapse" data-bs-target="#myCollapse3" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Merge Nodes</button>
+            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="collapse" data-bs-target="#myCollapse2" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Property Chain</button>
+            <button type="button" class="btn btn-primary ms-3" data-bs-toggle="collapse" data-bs-target="#myCollapse1" data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Final Causal Relations</button>
 
-              <div class="collapse" id="myCollapse3">
+            <div class="collapse" id="myCollapse3">
                 <div class="card card-body">
                     <p style="text-align: center">Select triples to merge</p>
-                    <form action="{% url 'merge' owl.id %}" method="post" >
-                    {% csrf_token %}
-                      <label for="merge">
-                       <ul class="list-group" id="myList">
+                    <form action="{% url 'newmerge' owl.id %}" method="post">
+                        {% csrf_token %}
+                        <label for="merge">
 
-                        </ul>
-
-                      </label>
-{#                          <select class="form-control" id="onN1" name="onN1" ></select>#}
-{#                        <select class="form-control" id="onN2" name="onN2" ></select>#}
-                         <input type="hidden" name="dot_graphN" id="dot_graphN" >
+                        </label>
+                        <input type="hidden" name="selectedValue" id="selectedValue">
+                        <input type="hidden" name="tripless" id="tripless">
                         <br>
-                         <button type="submit" class="btn btn-primary"  id="sparqlButton" >Submit</button>
+                        <button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
                     </form>
                 </div>
             </div>
-            <div class="collapse" id="myCollapse2">
+             <div class="collapse" id="myCollapse2">
                 <div class="card card-body">
-                    <p style="text-align: center">SPARQL</p>
-                    <form action="{% url 'sparql' owl.id %}" method="post">
-                    {% csrf_token %}
-                        <textarea class="form-control" id="sparqlQuery" name="sparqlQuery" rows="5"></textarea>
-                         <button type="submit" class="btn btn-primary"  id="sparqlButton" >Submit</button>
+                    <p style="text-align: center">Select two triple to perform property chain</p>
+                    <form action="{% url 'chain' owl.id %}" method="post">
+                        {% csrf_token %}
+                        <label for="propchain">Triple 1</label>
+                        <select class="form-control" id="chain" name="chain" ></select>
+                        <label for="propchain">Triple 2</label>
+                        <select class="form-control" id="chain1" name="chain1" ></select>
+                        <input type="hidden" name="selectedValue" id="selectedValue">
+                        <input type="hidden" name="triplesChain" id="triplesChain">
+                        <br>
+                        <button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
                     </form>
                 </div>
             </div>
-        <!-- Collapsible Element HTML -->
-            <div class="collapse " id="myCollapse">
+            <div class="collapse" id="myCollapse1">
                 <div class="card card-body">
-                    <p style="text-align: center">Intervention</p>
-                        <form action="{% url 'intervention' owl.id %}" method="post">
-              {% csrf_token %}
-                  <div class="form-group">
-                      <table>
-                          <tr>
-                              <td>
-                                   <label for="doing">Treatment</label>
-                              </td>
-                               <td>
-                                   <select class="form-control" id="onT" name="onT" ></select>
-                              </td>
-                          </tr>
-                          <tr>
-                              <td>
-                                   <label for="values">Intervening value</label>
-                              </td>
-                               <td>
-                                     <input type="text" class="radiovalue" id="" name="radiovalue">
-                              </td>
-                          </tr>
-                           <tr>
-                              <td>
-                                   <label for="on">Outcome</label>
-                              </td>
-                               <td>
-                                    <select class="form-control" id="on" name="OnI" ></select>
-                              </td>
-                          </tr>
-                      </table>
-                     <input type="hidden" name="dot_graphI" id="dot_graphI" >
-                      <input type="hidden" name="dataI" id="dataI" >
-                      <input type="hidden" name="profilesI" id="profilesI" >
-                  </div>
+                    <p style="text-align: center">Final Causal Relations</p>
+                    <form action="{% url 'causalRel' owl.id %}" method="post">
+                        {% csrf_token %}
+                        <label for="mergeF">
 
-                  <div class="row check">
-
-                  </div>
-
-                 <button type="submit" class="btn btn-primary"  id="show-intervened-button" >Submit</button>
-            </form>
-
+                        </label>
+                        <input type="hidden" name="selectedValueF" id="selectedValueF">
+                        <input type="hidden" name="triplessF" id="triplessF">
+                        <br>
+                        <button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
+                    </form>
                 </div>
             </div>
-            <div class="collapse " id="myCollapse1">
-                <div class="card card-body">
-                    <p style="text-align: center">Counterfactual</p>
-                       <form action="{% url 'calculate_counterfactual' owl.id %}" method="post">
-              {% csrf_token %}
-                  <div class="form-group counterfactaul">
-                      <table>
-                          <tr>
-                              <td><label for="profile">Select a profile : </label></td>
-                              <td> <select class="form-control" id="profile" name="profile" ></select></td>
-                          </tr>
-                          <tr>
-                              <td>
-                                  <label for="intervene">Intervene On : </label>
-                              </td>
-                              <td>
-                                  <select class="form-control" id="onC" name="onC" ></select>
-                              </td>
-                          </tr>
-                          <tr>
-                              <td>
-                                  <label for="values">Value</label>
-                              </td>
-                              <td>
-                                  <input type="text" class="radiovalueC" id="" name="radiovalueC">
-                              </td>
-                          </tr>
-                      </table>
-                    <input type="hidden" name="dot_graphC" id="dot_graphC" >
-                      <input type="hidden" name="dataC" id="dataC" >
-                      <input type="hidden" name="profilesC" id="profilesC" >
-                  </div>
-                  <div class="row checkC">
-
-                  </div>
-
-                 <button type="submit" class="btn btn-primary"  id="show-counterfactual-button" >Submit</button>
-            </form>
-
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-         <div class="col m12" >
-             <div id="sparqlDiv" style="display: none">
-                 <p>
-                 SPARQL Query result
-             </p>
-             {{ value }}
-             </div>
-
-         </div>
-    </div>
-    <div class="row" >
-        <div class="col m12" >
-            <div id="causalGraph" style="text-align: center">Causal Graph</div>
-            <div id="intervenedGraph" style="text-align: center;display: none">Intervened Causal Graph</div>
         </div>
     </div>
 
@@ -578,36 +490,18 @@
         </div>
     </div>
 
-    {% if intervention == 1 %}
-        <div class="row result" >
-             <div class="card blue-grey darken-1" style="width: -webkit-fill-available">
-                <div class="card-content white-text">
-                        <p>When intervening on {{ treatment }} and setting it to {{ value }}, following probability is seen on {{ outcome }}</p>
-                </div>
-            </div>
-            {{ estimate| safe }}
-        </div>
-    {% elif intervention == 0 %}
-        <div class="row result" >
-         <div class="card blue-grey darken-1" style="width: -webkit-fill-available">
-            <div class="card-content white-text">
-                <p> For profile {{ profile }}, if we set {{ treatment }} as {{ value }}, following outcome is observed</p>
 
-            </div>
-        </div>
-        {{ estimate| safe }}
-    </div>
-
-    {% endif %}
 
 
 <script>
 var currentPath = window.location.pathname;
 // Check if "merge" is present in the URL
 var trip = {{ owl.triple|safe }};
-{% if triples %}
-    var trip={{ triples|safe }}
+{% if mergedTriples %}
+    var trip={{ mergedTriples|safe }}
 {% endif %}
+
+
 
 
 var test =[]
@@ -644,19 +538,6 @@ var dotFormat = '';
     df={{ df|safe }};
 {% endif %}
 
-document.getElementById("dot_graphI").value = dotFormat.toString();
-document.getElementById("dot_graphC").value = dotFormat.toString();
-console.log(trip)
-document.getElementById("dot_graphN").value = JSON.stringify(trip);
-if (typeof profiles !== 'undefined') {
-    document.getElementById("profilesI").value = profiles;
-    document.getElementById("profilesC").value = profiles
-}
-if (typeof df !== 'undefined') {
-    document.getElementById("dataI").value = JSON.stringify(df)
-    document.getElementById("dataC").value = JSON.stringify(df)
-}
-
 
 var classes=[];
 var triples=[];
@@ -675,61 +556,6 @@ trip.forEach(function(triple){
     }
     triples.push(triple)
 })
- classes.forEach(function(classs){
-        var option = document.createElement("option");
-        option.value=classs;
-        option.text=classs;
-        option.id="on"+classs.replace(/\s+/g, '');
-        onDrop.add(option);
- })
-var onDropT = document.getElementById("onT");
-classes.forEach(function(classs){
-        var option = document.createElement("option");
-        option.value=classs;
-        option.text=classs;
-        option.id="on"+classs.replace(/\s+/g, '');
-        onDropT.add(option);
- })
-var onDropC = document.getElementById("onC");
-classes.forEach(function(classs){
-        var option = document.createElement("option");
-        option.value=classs;
-        option.text=classs;
-        option.id="on"+classs.replace(/\s+/g, '');
-        onDropC.add(option);
- })
-var label = document.querySelector('label[for="doing"]');
-{#classes.forEach(function (classs)#}
-{#{#}
-{#    var className = "form-check form-check-inline";#}
-{#    var inputType = "radio";#}
-{#    var inputId = classs;#}
-{#    var inputValue = classs;#}
-{#    var inputName = "doing";#}
-{#    var inputStyle = "opacity: 1 ;pointer-events: all";#}
-{#    var labelFor = "education";#}
-{#    var labelText = classs;#}
-{##}
-{#    // Create a string of HTML markup for the div element with the dynamic values#}
-{#    var html = `<div class="${className}">` +#}
-{#                  `<input class="form-check-input" type="${inputType}" id="${inputId}" value="${inputValue}" name="${inputName}" style="${inputStyle}">` +#}
-{#                  `<label class="form-check-label" for="${labelFor}">${labelText}</label>` +#}
-{#                `</div>`;#}
-{##}
-{#    // Insert the div element as HTML markup after the label element#}
-{#   // label.insertAdjacentHTML("afterend", html);#}
-{#)#}
-
-// Get a reference to the input box
-var inputBox = document.getElementsByClassName("radiovalue");
-
-var radioInputs = document.querySelectorAll('input[name="doing"]');
-radioInputs.forEach(function (radioInput) {
-  radioInput.addEventListener("click", function () {
-    var radioValue = radioInput.value;
-    document.querySelector('.radiovalue').id = radioValue;
-  });
-});
 
 const svgBody = document.getElementById("svg-body");
 const svgIntervened = document.getElementById("svg-intervened");
@@ -770,80 +596,120 @@ const sparqlDiv = document.getElementById("sparqlDiv")
       sparqlDiv.style.display="block";
   }
 
-
-{#var onDropN1 = document.getElementById("onN1");#}
-{#triples.forEach(function(triple){#}
-{#        var option = document.createElement("option");#}
-{#        option.value=triple.subject+' '+triple.predicate+' '+triple.object;#}
-{#        option.text=triple.subject+' '+triple.predicate+' '+triple.object;#}
-{#        option.id=triple.subject+''+triple.predicate+''+triple.object;#}
-{#        onDropN1.add(option);#}
-{# })#}
-
 var ul = document.getElementById("myList");
-triples.forEach(function(triple){
-        var li = document.createElement("li");
-        li.textContent=triple.subject+' '+triple.predicate+' '+triple.object;
-        li.classList.add('list-group-item')
-        li.id=triple.subject+''+triple.predicate+''+triple.object;
-        li.addEventListener('click', function() {
-            li.className = 'list-group-item list-group-item-success'; // Change the background color to red on click
-          });
-        ul.appendChild(li);
- })
-var onDropN2 = document.getElementById("onN2");
-classes.forEach(function(classs){
-        var option = document.createElement("option");
-        option.value=classs;
-        option.text=classs;
-        option.id="on"+classs.replace(/\s+/g, '');
-        onDropN2.add(option);
- })
-
-var onDropC = document.getElementById("profile");
-
-profiles.forEach(function(prof){
+{#triples.forEach(function(triple){#}
+{#        var li = document.createElement("li");#}
+{#        li.textContent=triple.subject+' '+triple.predicate+' '+triple.object;#}
+{#        li.classList.add('list-group-item')#}
+{#        li.id=triple.subject+''+triple.predicate+''+triple.object;#}
+{#        li.value=triple.subject+''+triple.predicate+''+triple.object;#}
+{#        li.addEventListener('click', function() {#}
+{#            li.className = 'list-group-item list-group-item-success'; // Change the background color to red on click#}
+{#          });#}
+{#        ul.appendChild(li);#}
+{# })#}
+var mergedTriples
+{% if mergedTriples %}
+    var mergedTriples={{ mergedTriples|safe }}
+    var chainC = document.getElementById("chain");
+    var chainC1 = document.getElementById("chain1");
+    var tri = document.getElementById('triplesChain')
+    tri.value= JSON.stringify(mergedTriples)
+    mergedTriples.forEach(function(triple){
             var option = document.createElement("option");
-            option.value=prof;
-            option.text=prof;
-            option.id="on"+prof.replace(/\s+/g, '');
-            onDropC.add(option);
-})
+            option.value=JSON.stringify({
+                            predicate: triple.predicate,
+                            subject: triple.subject,
+                            object: triple.object
+                          });
+            option.text=triple.subject + " " + triple.predicate + " " + triple.object;
+            option.id="on"+triple.subject  + triple.predicate  + triple.object;
+            chainC.add(option);
+            var option = document.createElement("option");
+            option.value=JSON.stringify({
+                            predicate: triple.predicate,
+                            subject: triple.subject,
+                            object: triple.object
+                          });
+            option.text=triple.subject + " " + triple.predicate + " " + triple.object;
+            option.id="on"+triple.subject  + triple.predicate  + triple.object;
+            chainC1.add(option);
+ })
 
-{#var label = document.querySelector('label[for="merge"]');#}
-{#classes.forEach(function (classs) {#}
-{#        var className = "form-check form-check-inline";#}
-{#        var inputType = "checkbox";#}
-{#        var inputId = classs;#}
-{#        var inputValue = classs;#}
-{#        var inputName = "intervene";#}
-{#        var inputStyle = "opacity: 1 ;pointer-events: all";#}
-{#        var labelFor = "education";#}
-{#        var labelText = classs;#}
-{##}
-{#        // Create a string of HTML markup for the div element with the dynamic values#}
-{#        var html = `<div class="${className}">` +#}
-{#            `<input class="form-check-input" type="${inputType}" id="${inputId}" value="${inputValue}" name="${inputName}" style="${inputStyle}">` +#}
-{#            `<label class="form-check-label" for="${labelFor}">${labelText}</label>` +#}
-{#            `</div>`;#}
-{##}
-{#        // Insert the div element as HTML markup after the label element#}
-{#        label.insertAdjacentHTML("afterend", html);#}
-{#    }#}
-{#)#}
 
-var inputBoxC = document.getElementsByClassName("radiovalueC");
+{% endif %}
 
-var radioInputs= document.querySelectorAll('input[name="intervene"]');
-radioInputs.forEach(function (radioInput) {
-
-  radioInput.addEventListener("click", function () {
-    var radioValue = radioInput.value;
-    document.querySelector('.radiovalueC').id = radioValue;
+var label = document.querySelector('label[for="merge"]');
+var dict_separators = {};
+triples.forEach(function(triple) {
+  var className = "form-check form-check-inline";
+  var inputType = "checkbox";
+  var inputId = "merge";
+  var inputValue = JSON.stringify({
+    predicate: triple.predicate,
+    subject: triple.subject,
+    object: triple.object
   });
+  var inputName = "intervene";
+  var inputStyle = "opacity: 1; pointer-events: all";
+  var labelFor = "education";
+  var labelText = triple.subject + " " + triple.predicate + " " + triple.object;
+
+  // Create a string of HTML markup for the div element with the dynamic values
+  var html = `<div class="${className}">` +
+    `<input class="form-check-input" type="${inputType}" id="${inputId}" value="${inputValue.replace(/"/g, '&quot;')}" name="${inputName}" style="${inputStyle}">` +
+    `<label class="form-check-label" for="${labelFor}">${labelText}</label>` +
+    `</div>`;
+
+  // Insert the div element as HTML markup after the label element
+  label.insertAdjacentHTML("afterend", html);
+});
+
+var label = document.querySelector('label[for="mergeF"]');
+triples.forEach(function(triple) {
+  var className = "form-check form-check-inline";
+  var inputType = "checkbox";
+  var inputId = "merge";
+  var inputValue = JSON.stringify({
+    predicate: triple.predicate,
+    subject: triple.subject,
+    object: triple.object
+  });
+  var inputName = "intervene";
+  var inputStyle = "opacity: 1; pointer-events: all";
+  var labelFor = "education";
+  var labelText = triple.subject + " " + triple.predicate + " " + triple.object;
+
+  // Create a string of HTML markup for the div element with the dynamic values
+  var html = `<div class="${className}">` +
+    `<input class="form-check-input" type="${inputType}" id="${inputId}" value="${inputValue.replace(/"/g, '&quot;')}" name="${inputName}" style="${inputStyle}">` +
+    `<label class="form-check-label" for="${labelFor}">${labelText}</label>` +
+    `</div>`;
+
+  // Insert the div element as HTML markup after the label element
+  label.insertAdjacentHTML("afterend", html);
 });
 
 
+var tri = document.getElementById('tripless')
+var triF = document.getElementById('triplessF')
+tri.value= JSON.stringify(trip)
+triF.value= JSON.stringify(trip)
+document.addEventListener("DOMContentLoaded", function() {
+    var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(function(checkbox) {
+      checkbox.addEventListener("change", function() {
+        var checkedCheckboxes = [];
+        checkboxes.forEach(function(cb) {
+          if (cb.checked) {
+            checkedCheckboxes.push(cb.value);
+          }
+        });
+        document.getElementById("selectedValue").value = JSON.stringify(checkedCheckboxes);
+        document.getElementById("selectedValueF").value = JSON.stringify(checkedCheckboxes);
+      });
+    });
+  });
 </script>
 
 {% endblock %}

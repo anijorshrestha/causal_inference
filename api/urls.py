@@ -28,4 +28,12 @@ urlpatterns = [
              views.sparql, name='sparql'),
     path('owl/<int:owl_id>/merge',
              views.merge, name='merge'),
+    path('owl/<int:owl_id>/newmerge',
+             views.newMerge, name='newmerge'),
+    path('owl/<int:owl_id>/chain',
+             views.chain, name='chain'),
+    path('owl/<int:owl_id>/causalRel',
+             views.causalRel, name='causalRel'),
+    path('owl/<int:owl_id>/causalGraph',
+             views.causalGraph, name='causalGraph'),
 ]

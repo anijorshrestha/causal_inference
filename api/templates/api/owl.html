@@ -11,6 +11,7 @@
 
 {% block toolbar %}
     <a href="{% url "owl_real_time_graph" owl.id %}" class="btn">Interactive</a>
+    <a href="{% url "causalGraph" owl.id %}" class="btn">Causal Graph</a>
     <a href="{% url "owl_export" owl.id %}" class="btn">Download .json</a>
     <a href="{% url 'owl_change' owl.id %}" class="btn"><i class="material-icons">edit</i></a>
     <a href="{% url 'owl_delete' owl.id %}" class="btn red"><i class="material-icons">delete</i></a>

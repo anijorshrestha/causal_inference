@@ -1,21 +1,15 @@
-import base64
-import io
-import json
-import urllib.parse
-import time
-from array import array
-
-
 import networkx as nx
+import owlready2
 import pandas as pd
+import rdflib
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from owlready2 import get_ontology, onto_path
+from owlready2 import get_ontology, onto_path, default_world
 import pyAgrum as gum
 import pyAgrum.causal as csl
-import pandas as pd
+
 
 class OWLFile(models.Model):
     name = models.CharField(max_length=256, blank=True, null=True)
@@ -55,58 +49,138 @@ class OWLFile(models.Model):
         return OWLRelationship.objects.filter(owl=self)
 
     def analyze(self, save=True):
-        owl_data = get_ontology("file://" + self.file.path).load(only_local=True)
+        g = rdflib.Graph()
+        g.parse("file://" + self.file.path)
+        owl_data = get_ontology("file://" + self.file.path).load()
+        #owl_data = get_ontology("media/owls/20230703_ROXANA_v1_var_IOFcausal_inclVarStates_inclMergedDataCL4_allMerged (1).owl").load()
         OWLClass.objects.filter(owl=self).delete()
         OWLRelationship.objects.filter(owl=self).delete()
 
-        rels = [OWLRelationship(name=rel.iri, owl=self) for rel in owl_data.properties()]
-        OWLRelationship.objects.bulk_create(rels, ignore_conflicts=True)
+
+        # rels = [OWLRelationship(name=rel.iri, owl=self) for rel in owl_data.properties()]
+        # OWLRelationship.objects.bulk_create(rels, ignore_conflicts=True)
 
         all_classes = []
+        all_rels =[]
         instance_cache = []
+        list_cls=[]
+        annotation_query = """
+                    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-        for cls in list(owl_data.classes()):
-            class_iri = cls.iri
-            class_label = str(cls.label[0]) if cls.label else None
+                    SELECT ?Class ?instances
+                                     WHERE {
+                                       ?Class rdf:type owl:Class .
+                                       ?instances rdf:type ?Class .
+                                     }
 
-            all_classes.append(OWLClass(owl=self, name=class_iri, label=class_label))
-
-            # Get all subclasses
-            for sub_cls in cls.subclasses():
-                all_classes.append(
-                    OWLClass(owl=self, name=sub_cls.iri, label=str(sub_cls.label[0]) if sub_cls.label else None))
-
-            for individual in cls.instances():
-                for obj_property in list(owl_data.object_properties()):
-                    for obj_prop_rel in obj_property[individual]:
-                        the_ind, _ = OWLClass.objects.get_or_create(name=class_iri, owl=self)
-                        ob = obj_prop_rel.is_a[0]
-                        the_rel, _ = OWLClass.objects.get_or_create(name=ob.iri, owl=self)
-                        instance_cache.append(OWLRelationshipInstance(
-                            owlfile=self,
-                            instance=OWLInstance.objects.get_or_create(name=individual.iri, owl_class=the_ind)[0],
-                            relationship=OWLRelationship.objects.get(name=obj_property.iri, owl=self),
-                            relation_instance=
-                            OWLInstance.objects.get_or_create(name=obj_prop_rel.iri, owl_class=the_rel)[0]
-                        ))
-
-            for sub_cls in cls.subclasses():
-                for individual in sub_cls.instances():
-                    for obj_property in list(owl_data.object_properties()):
-                        for obj_prop_rel in obj_property[individual]:
-                            the_ind, _ = OWLClass.objects.get_or_create(name=sub_cls.iri, owl=self)
-                            ob = obj_prop_rel.is_a[0]
-                            the_rel, _ = OWLClass.objects.get_or_create(name=ob.iri, owl=self)
-                            instance_cache.append(OWLRelationshipInstance(
-                                owlfile=self,
-                                instance=OWLInstance.objects.get_or_create(name=individual.iri, owl_class=the_ind)[0],
-                                relationship=OWLRelationship.objects.get(name=obj_property.iri, owl=self),
-                                relation_instance=
-                                OWLInstance.objects.get_or_create(name=obj_prop_rel.iri, owl_class=the_rel)[0]
-                            ))
-
+                    """
+        annotate_qres = g.query(annotation_query)
+        for cls in annotate_qres:
+            if 'commissioning' in cls.Class:
+                class_iri=cls.Class.split('#')[-1]
+            else:
+                class_iri = cls.Class.split('/')
+            class_label=''
+            if class_iri not in list_cls:
+                list_cls.append(class_iri)
+                all_classes.append(OWLClass(owl=self, name=class_iri, label=class_label))
         OWLClass.objects.bulk_create(all_classes, ignore_conflicts=True)
-        OWLRelationshipInstance.objects.bulk_create(instance_cache)
+
+        list_ins=[]
+        all_instance = []
+        for i in annotate_qres:
+            if 'commissioning' in i.Class:
+                class_iri = i.Class.split('#')[-1]
+            else:
+                class_iri = i.Class.split('/')[-1]
+            the_class, _ = OWLClass.objects.get_or_create(name=class_iri, owl=self)
+
+            if 'commissioning' in i.instances:
+                instance_iri = i.instances.split('#')[-1]
+            else:
+                instance_iri = i.instances.split('/')[-1]
+            if instance_iri not in list_ins:
+                list_ins.append(instance_iri)
+                all_instance.append(OWLInstance(name=instance_iri, owl_class=the_class))
+        OWLInstance.objects.bulk_create(all_instance, ignore_conflicts=True)
+
+
+        annotation_query= """
+                           PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                           PREFIX owl: <http://www.w3.org/2002/07/owl#>
+                           PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                           PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+                           SELECT ?relation
+                             WHERE {
+                               ?instances ?relation ?instance2 .
+                               ?relation rdf:type owl:ObjectProperty .
+                             }
+
+                           """
+        relations = g.query(annotation_query)
+        list_ax=[]
+        auxiliaryReList = []
+        for rel in relations:
+            if 'commissioning' in rel.relation:
+                rel_iri = rel.relation.split('/')[-1]
+            else:
+                rel_iri = rel.relation.split('#')[-1]
+            if rel_iri not in list_ax:
+                list_ax.append(rel_iri)
+                auxiliaryReList.append(OWLRelationship(name=rel_iri, owl=self))
+
+        OWLRelationship.objects.bulk_create(auxiliaryReList, ignore_conflicts=True)
+
+
+        all_relinstance = []
+        relinstance = list(default_world.sparql("""
+                                      SELECT DISTINCT ?Instance ?Relation ?Instance2
+                                                WHERE { 
+                                            ?Instance ?Relation ?Instance2.
+                                            ?Relation rdf:type owl:ObjectProperty.
+                                            ?Instance rdf:type ?Class.
+                                            ?Instance2 rdf:type ?Class2.
+                                            ?Class rdf:type owl:Class.
+                                            ?Class2 rdf:type owl:Class.
+                                            }
+                                """))
+
+        for i in relinstance:
+            insOne = i[0]
+            relation = i[1]
+            insTwo =i[2]
+            if 'VAR' in str(insOne):
+                splitOne = str(insOne).split('VAR.')
+            else:
+                splitOne = str(insOne).split('roxana.')
+            insOne_iri = splitOne[-1]
+            the_insOne, _ = OWLInstance.objects.get_or_create(name=insOne_iri)
+
+            if 'VAR' in str(relation):
+                splitIn = str(relation).split('VAR.')
+            else:
+                splitIn = str(relation).split('roxana.')
+            realtion_iri = splitIn[-1]
+            the_relation, _ = OWLRelationship.objects.get_or_create(name=realtion_iri, owl=self)
+
+            if 'VAR' in str(insTwo):
+                splitTwo = str(insTwo).split('VAR.')
+            else:
+                splitTwo = str(insTwo).split('roxana.')
+            insTwo_iri = splitTwo[-1]
+            the_insTwo, _ = OWLInstance.objects.get_or_create(name=insTwo_iri)
+
+            all_relinstance.append(OWLRelationshipInstance(
+                                 owlfile=self,
+                                 instance=the_insOne,
+                                 relationship=the_relation,
+                                 relation_instance=the_insTwo
+                             ))
+        OWLRelationshipInstance.objects.bulk_create(all_relinstance, ignore_conflicts=True)
 
         if save:
             self.save()
