@@ -17,7 +17,7 @@ Cython==0.29.34
 debugpy==1.6.3
 decorator==5.1.1
 df2onehot==1.0.1
-Django==4.1.1
+Django==3.2.19
 docutils==0.19
 dowhy==0.9.1
 econml==0.14.0
