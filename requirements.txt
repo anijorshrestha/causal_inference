@@ -46,7 +46,7 @@ jupyter_client==7.3.5
 jupyterlab-widgets==3.0.3
 kiwisolver==1.4.4
 lightgbm==3.3.4
-llvmlite==0.40.0
+llvmlite==0.39.1
 MarkupSafe==2.1.1
 matplotlib==3.6.0
 matplotlib-inline==0.1.6
